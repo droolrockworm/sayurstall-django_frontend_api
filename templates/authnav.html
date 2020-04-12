@@ -1,0 +1,15 @@
+{% if user.is_authenticated %}
+  <div class="authnav medsize"><span class="reg gray">Welcome {{ user.username }} |</span>
+    <span class="med">
+      {% if request.path != "/" %}
+      <a href="/">DASHBOARD</a> <span class="reg gray">|</span>
+      {% endif %}
+      {% if user.is_staff %}
+      <a href="/admin">ADMIN</a> <span class="reg gray">|</span>
+      {% endif %}
+      <a href="/logout/">LOG OUT</a>
+    </span>
+  </div>
+{% else %}
+  <div class="authnav medsize"><span class="med"><a href="/login/">LOG IN</a></span></div>
+{% endif %}

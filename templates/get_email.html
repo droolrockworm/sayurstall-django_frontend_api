@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login</title>
+    {% load static %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/stylesheet.css' %}" />
+    <!-- <link rel="stylesheet" href="/static/css/stylesheet.css" type="text/css"> -->
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" />
+
+    <!-- <link rel="icon" href="/static/images/favicon.ico"> -->
+  </head>
+  <body>
+    <div id="container">
+      <div id="logo"><a href="{% static 'css/stylesheet.css' %}" id="logo_roll"></a></div>
+      <div style="overflow:hidden;padding-bottom:20px;">
+        <div class="subhead">Hello, we are currently in the process of updating our user system,
+        and we noticed that we don't have some of your information.
+        Please update it so we can keep track of who you are!</div>
+        <div style="float:left;margin-left:15px;width:265px;">
+
+          <form method="post" action="/get_email/">
+            {% csrf_token %}
+
+
+            {% if form.errors %}
+            <p class="headcopy">Phone and email must match confirmation fields</p>
+            {% endif %}
+            <p>
+              <div class="smalllabel">FIRST NAME</div>
+              <!-- <input type = "text" style = "margin-left:20%;"
+                  name = "email" /> -->
+              {{ form.fname }}
+            </p>
+            <p>
+              <div class="smalllabel">LAST NAME</div>
+              <!-- <input type = "text" style = "margin-left:20%;"
+                  name = "confirmemail" /> -->
+              {{ form.lname }}
+            </p>
+            <p>
+              <div class="smalllabel">EMAIL</div>
+              <!-- <input type = "text" style = "margin-left:20%;"
+                  name = "email" /> -->
+              {{ form.email }}
+            </p>
+            <p>
+              <div class="smalllabel">CONFIRM EMAIL</div>
+              <!-- <input type = "text" style = "margin-left:20%;"
+                  name = "confirmemail" /> -->
+              {{ form.econfirm }}
+            </p>
+            <p>
+              <div class="smalllabel">PHONE</div>
+              <!-- <input type = "text" style = "margin-left:20%;"
+                  name = "email" /> -->
+              {{ form.phone }}
+            </p>
+            <p>
+              <div class="smalllabel">CONFIRM PHONE</div>
+              <!-- <input type = "text" style = "margin-left:20%;"
+                  name = "confirmemail" /> -->
+              {{ form.pconfirm }}
+            </p>
+
+            <p></p><input type="submit" value="Continue"/></p>
+            <input type="hidden" name="next" value="{{ next }}"/>
+          </form>
+
+          <!-- <div class="smalllabel" style="margin-top:30px;">
+
+      		  <p><b>Support:</b></br>
+      		  Email: <a href="mailto:support@unityesg.com">support@unityesg.com</a></br>
+      		  Texas Support: (877) 486-4892 Ext 704</br>
+      		  All Other States Support: (877) 486-4892 Ext 702
+          </div> -->
+        </div>
+      </div>
+      <div class="section gray bm20">SUPPORT CONTACT</div>
+      <div style="overflow:hidden;">
+        <div class="med medsize" style="float:left;margin-left:15px">
+          Tel: +1 (877) 486 4892 X3<br/>
+          <br/>
+          Email: <a style = "color:blue;text-decoration: underline;" href="mailto:customerservice@unityesg.com">customerservice@unityesg.com</a>
+        </div>
+      </div>
+      <div class="section"></div>
+
+    </div>
+
+
+  </body>
+</html>

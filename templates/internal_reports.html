@@ -1,0 +1,198 @@
+{% load report_extras %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=f4a98b95-3e21-41dd-aa62-736b4ad41cfe"> </script>
+
+    <title>{{ locname|title }} Internal Reports</title>
+    <link rel="stylesheet" href="/static/css/stylesheet.css" type="text/css">
+    <link rel="icon" href="/static/images/favicon.ico">
+
+    <script type="text/javascript" src="http://d3js.org/d3.v2.min.js"></script>
+
+    <style type="text/css">
+      .reportbox {margin:0 0 0 9px; padding-bottom:80px; width:951px; overflow:hidden;}
+      .leftbox {float:left; width:297px; margin-left:17px;}
+      .obox {float:left; width:275px; margin-left:25px;}
+
+      .reportheader {
+        font-family: klreg, helvetica, arial, sans-serif;
+        line-height:25px;
+        padding-left:8px;
+        border-bottom:1px solid #e0e0e0;
+        height:40px;
+      }
+      .reportheader.left {
+        font-size:19px;
+      }
+      .reportheader.red {
+        color:#f52500;
+        font-size:14px;
+      }
+      .reportheader.blue {
+        color:#23a5fc;
+        font-size:14px;
+      }
+
+      .reportrow {
+        line-height:40px;
+        padding-left:8px;
+        border-bottom:1px solid #e0e0e0;
+        height:40px;
+      }
+
+      .reportlabel {
+        font-family: klmed, helvetica, arial, sans-serif;
+        font-size: 11px;
+        color: #aaa;
+      }
+
+      .reportvalue {
+        font-family: klreg, helvetica, arial, sans-serif;
+        margin-left:10px;
+        font-size:14px;
+      }
+
+      .reportchart {
+        font-family: klreg, helvetica, arial, sans-serif;
+        float:right;
+        margin-right:15px;
+      }
+
+      .reportblue {color:#23a5fc;}
+      .reportred {color:#f52500;}
+      .reportgray {color:#ccc;}
+
+      .chart {
+        font: 10px sans-serif;
+        margin-left:10px;
+        shape-rendering: crispEdges;
+      }
+
+      .chart rect {
+        stroke: white;
+        fill: #89b804;
+      }
+
+      .chart text.bar {
+        fill: white;
+      }
+    </style>
+
+
+
+  </head>
+  <body>
+    <div id="container">
+      {% include 'authnav.html' %}
+
+      <!-- <div id="smalllogo"><a href="/"><img src="/static/images/small_logo.png" border="0"/></a></div> -->
+      <div id="smalllogo"><a href="/"><img src="/static/images/ueslogo.jpg" border="0" style= "width:200px; height: 120px"/></a></div>
+
+
+      <div class="selectionbox smalllabel">
+        <form method="post" action="/internal_reports/">
+        {% csrf_token %}
+        <div style="float:left;">
+          FROM: <input class="boxinput" name="from_date" type="text" value="{{ from_date }}">
+          TO: <input class="boxinput" name="to_date" type="text" value="{{ to_date }}">
+        </div>
+        <div style="float:right;"><input type="submit" value="RUN REPORT"/></div>
+        <input type="hidden" name="key" value="{{key}}">
+        </form>
+      </div>
+
+      <div style="margin:25px 0 60px 15px;">
+        <div class="subsubhead">{{ locname|title }} Extended Report</div>
+      </div>
+
+
+      {% if daily_kw_totals|length > 2 %}
+        <div class="section">kW/h Count By Day</div>
+        <div id="kwchart"></div>
+        <script language="javascript">
+          var daily_kw_totals = {{ daily_kw_totals|safe }};
+
+          daily_kw_totals = daily_kw_totals.map(function (d, i) {
+            // var dt = new Date(d.time * 1000);
+
+            return {
+              // time: (dt.getMonth()+1) + "/" + dt.getDate(),
+              time: d.time,
+
+              value:d.value
+            }
+          });
+
+          var data = daily_kw_totals.map(function(d, i) {return d.value})
+
+          var x = d3.scale.linear()
+              .domain([0, d3.max(data)])
+              .range([0, 420]);
+
+          var y = d3.scale.ordinal()
+              .domain(data)
+              .rangeBands([0, data.length * 30]);
+
+          var chart = d3.select("#kwchart").append("svg")
+              .attr("class", "chart")
+              .attr("width", 440)
+              .attr("height", (data.length * 30) + 20)
+            .append("g")
+              .attr("transform", "translate(10,15)");
+
+          chart.selectAll("line")
+              .data(x.ticks(10))
+            .enter().append("line")
+              .attr("x1", x)
+              .attr("x2", x)
+              .attr("y1", 0)
+              .attr("y2", (data.length * 30)-10)
+              .style("stroke", "#ccc");
+
+          chart.selectAll(".rule")
+              .data(x.ticks(10))
+            .enter().append("text")
+              .attr("x", x)
+              .attr("y", 0)
+              .attr("dy", -3)
+              .attr("text-anchor", "middle")
+              .text(String);
+
+          chart.selectAll("rect")
+              .data(data)
+            .enter().append("rect")
+              .attr("y", y)
+              .attr("width", x)
+              .attr("height", 20);
+
+          chart.selectAll(".bar")
+              .data(daily_kw_totals)
+            .enter().append("text")
+              .attr("class", "bar")
+              .attr("x", function (d) {return x(d.value)})
+              .attr("y", function(d) { return y(d.value) + (y.rangeBand()-10) / 2; })
+              .attr("dx", -3)
+              .attr("dy", ".35em")
+              .attr("text-anchor", "end")
+              .text(function (d) {return (d.time + " (" + Math.round(d.value) + ")")});
+
+          chart.append("line")
+              .attr("y1", 0)
+              .attr("y2", (data.length * 30)-10)
+              .style("stroke", "#000");
+
+        </script>
+      {% endif %}
+
+
+
+    </div>
+
+
+
+
+
+  </body>
+</html>

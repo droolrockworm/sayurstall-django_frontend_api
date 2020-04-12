@@ -1,0 +1,480 @@
+{% load report_extras %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=f4a98b95-3e21-41dd-aa62-736b4ad41cfe"> </script>
+
+    <title>{{ locname|title }} Report</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/stylesheet.css' %}" />
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" />
+
+    <!-- <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/d3/2.8.1/d3.v2.min.js"></script> -->
+
+    <style type="text/css">
+      .reportbox {margin:0 0 0 9px; padding-bottom:80px; width:951px; overflow:hidden;}
+      .leftbox {float:left; width:297px; margin-left:17px;}
+      .alarmbox {float:left; width:500px; margin-left:17px;}
+      .obox {float:left; width:275px; margin-left:25px;}
+
+      .reporticon {float:left; width:37px; height:32px;}
+      .reporticon.hvac {background:url("{% static 'images/icon_hvac.gif' %}")}
+      .reporticon.light {background:url("{% static 'images/icon_light.gif' %}")}
+      .reporticon.kw {background:url("{% static 'images/icon_kw.gif' %}")}
+
+      .reportheader {
+        font-family: klreg, helvetica, arial, sans-serif;
+        line-height:25px;
+        padding-left:8px;
+        border-bottom:1px solid #e0e0e0;
+        height:40px;
+      }
+      .reportheader.left {
+        font-size:19px;
+      }
+      .reportheader.red {
+        color:#f52500;
+        font-size:14px;
+      }
+      .reportheader.blue {
+        color:#23a5fc;
+        font-size:14px;
+      }
+
+      .reportrow {
+        line-height:40px;
+        padding-left:8px;
+        border-bottom:1px solid #e0e0e0;
+        height:40px;
+      }
+
+      .reportrow_noborder {
+        line-height:40px;
+        padding-left:8px;
+        line-height:40px;
+      }
+
+      .reportrow_noheight {
+        padding-left:8px;
+        padding-bottom:10px;
+        border-bottom:1px solid #e0e0e0;
+      }
+
+      .reportlabel {
+        font-family: klmed, helvetica, arial, sans-serif;
+        font-size: 11px;
+        color: #aaa;
+      }
+
+      .reportvalue {
+        font-family: klreg, helvetica, arial, sans-serif;
+        margin-left:10px;
+        font-size:14px;
+      }
+
+      .reportchart {
+        font-family: klreg, helvetica, arial, sans-serif;
+        float:right;
+        margin-right:15px;
+      }
+
+      .reportblue {color:#23a5fc;}
+      .reportred {color:#f52500;}
+      .reportgray {color:#ccc;}
+    </style>
+
+
+  </head>
+  <body>
+    <div id="container">
+      <!-- <div class="authnav medsize"><span class="reg gray">Welcome {{ user.username }} |</span>
+        <span class="med">
+          <a href="/logout/">LOG OUT</a>
+        </span>
+      </div> -->
+      {% include 'authnav.html' %}
+
+
+      <div id="smalllogo"><a href="/"><img src="/static/images/ueslogo.jpg" border="0" style= "width:200px; height: 120px"/></a></div>
+
+      <div class="selectionbox smalllabel">
+        <form method="post" action="/report/">
+        {% csrf_token %}
+        <div style="float:left;">
+          FROM: <input class="boxinput" name="from_date" type="text" value="{{ from_date }}">
+          TO: <input class="boxinput" name="to_date" type="text" value="{{ to_date }}">
+        </div>
+        <div style="float:right;"><input type="submit" value="RUN REPORT"/></div>
+        <input type="hidden" name="key" value="{{key}}">
+        </form>
+      </div>
+
+      <div style="margin:25px 0 60px 15px;">
+        <div class="subsubhead">{{ locname|title }}</div>
+      </div>
+
+
+      {% if kw %}
+	<!-- {{ kw.count }} days -->
+        <div class="section">Total Energy Usage</div>
+          <div class="reportbox">
+            <div class="reporticon kw"></div>
+            <div class="leftbox">
+              <div class="reportheader left">{{ kw.name|title }}</div>
+              <div class="reportrow left">
+                <span class="reportlabel">TOTAL KWH:</span>
+                <span class="reportvalue">{{ kw.total|floatformat:-2 }}</span>
+              </div>
+              <div class="reportrow left">
+                <span class="reportlabel">AVG. DAILY USE:</span>
+                <span class="reportvalue">{{ kw.davg|floatformat:-2 }}</span>
+              </div>
+            </div>
+
+            <div class="obox">
+                <div class="reportheader red"></div>
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. DEMAND:</span>
+                  <span class="reportvalue">{{ kw.avg|floatformat:-2 }} kW/h</span>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">MIN DEMAND:</span>
+                  <span class="reportvalue">{{ kw.min|floatformat:-2 }} kW/h</span>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">MAX DEMAND:</span>
+                  <span class="reportvalue">{{ kw.peak|floatformat:-2 }} kW/h</span>
+                </div>
+            </div>
+          </div>
+
+          <div class="reportbox">
+            <div class="reporticon"></div>
+            <div class="leftbox">
+              <div class="reportheader left">Usage By Day</div>
+              {% ifnotequal kw.day_avgs.0 -1 %}
+              <div class="reportrow left">
+                <span class="reportlabel">SUNDAY AVG:</span>
+                <span class="reportvalue">{{ kw.day_avgs.0|floatformat:-2 }}</span>
+              </div>
+              {% endifnotequal %}
+              {% ifnotequal kw.day_avgs.1 -1 %}
+              <div class="reportrow left">
+                <span class="reportlabel">MONDAY AVG:</span>
+                <span class="reportvalue">{{ kw.day_avgs.1|floatformat:-2 }}</span>
+              </div>
+              {% endifnotequal %}
+              {% ifnotequal kw.day_avgs.2 -1 %}
+              <div class="reportrow left">
+                <span class="reportlabel">TUESDAY AVG:</span>
+                <span class="reportvalue">{{ kw.day_avgs.2|floatformat:-2 }}</span>
+              </div>
+              {% endifnotequal %}
+              {% ifnotequal kw.day_avgs.3 -1 %}
+              <div class="reportrow left">
+                <span class="reportlabel">WEDNESDAY AVG:</span>
+                <span class="reportvalue">{{ kw.day_avgs.3|floatformat:-2 }}</span>
+              </div>
+              {% endifnotequal %}
+              {% ifnotequal kw.day_avgs.4 -1 %}
+              <div class="reportrow left">
+                <span class="reportlabel">THURSDAY AVG:</span>
+                <span class="reportvalue">{{ kw.day_avgs.4|floatformat:-2 }}</span>
+              </div>
+              {% endifnotequal %}
+              {% ifnotequal kw.day_avgs.5 -1 %}
+              <div class="reportrow left">
+                <span class="reportlabel">FRIDAY AVG:</span>
+                <span class="reportvalue">{{ kw.day_avgs.5|floatformat:-2 }}</span>
+              </div>
+              {% endifnotequal %}
+              {% ifnotequal kw.day_avgs.6 -1 %}
+              <div class="reportrow left">
+                <span class="reportlabel">SATURDAY AVG:</span>
+                <span class="reportvalue">{{ kw.day_avgs.6|floatformat:-2 }}</span>
+              </div>
+              {% endifnotequal %}
+            </div>
+          </div>
+
+          {% if historical_kw %}
+          <div class="reportbox">
+            <div class="reporticon"></div>
+            <div class="leftbox">
+              <div class="reportheader left">Historical Usage</div>
+              {% for m in historical_kw %}
+              <div class="reportrow left">
+                <span class="reportlabel">{{ m.month|upper }}:</span>
+                <span class="reportvalue">{{ m.total|floatformat:-2 }}</span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+      {% endif %}
+
+      {% if kwmeters %}
+        <div class="section">Individual Energy Meters</div>
+          {% for k in kwmeters %}
+          <div class="reportbox">
+            <div class="reporticon kw"></div>
+            <div class="leftbox">
+              <div class="reportheader left">{{ k.name|title }}</div>
+              <div class="reportrow left">
+                <span class="reportlabel">TOTAL KWH:</span>
+                <span class="reportvalue">{{ k.total|floatformat:-2 }}</span>
+              </div>
+              <div class="reportrow left">
+                <span class="reportlabel">AVG. DAILY USE:</span>
+                <span class="reportvalue">{{ k.davg|floatformat:-2 }}</span>
+              </div>
+
+            </div>
+
+            <div class="obox">
+                <div class="reportheader red"></div>
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. DEMAND:</span>
+                  <span class="reportvalue">{{ k.avg|floatformat:-2 }} kW/h</span>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">MIN DEMAND:</span>
+                  <span class="reportvalue">{{ k.min|floatformat:-2 }} kW/h</span>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">MAX DEMAND:</span>
+                  <span class="reportvalue">{{ k.peak|floatformat:-2 }} kW/h</span>
+                </div>
+            </div>
+
+          </div>
+          {% endfor %}
+      {% endif %}
+
+      {% if hvacs %}
+        <div class="section">HVACs</div>
+        {% for c in hvacs %}
+          <div class="reportbox">
+            <div class="reporticon hvac"></div>
+            <div class="leftbox">
+              <div class="reportheader left">{{ c.name|title }}</div>
+              <div class="reportrow left">
+                <span class="reportlabel">AVG. ON TIME:</span>
+                <span class="reportvalue">{{ c.on|format_minutes }}</span>
+              </div>
+              {% if c.g_on > 0 %}
+              <div class="reportrow left">
+                <span class="reportlabel">AVG. FAN RUN TIME:</span>
+                <span class="reportvalue">{{ c.g_on|format_minutes }}</span>
+              </div>
+              {% endif %}
+              {% if c.alarms %}
+              <div class="reportrow_noborder left">
+                <span class="reportlabel">ALARMS:</span>
+              </div>
+              <div class="reportrow_noheight left">
+                <table border="0">
+                   {% for a in c.alarms %}
+                   <tr>
+                     <td class="reportvalue">{{a.ts}}</td>
+                     <td class="reportvalue"><b>{{a.code|format_alarm_code}}</b></td>
+                   </tr>
+                   {% endfor %}
+                </table>
+              </div>
+              {% endif %}
+            </div>
+
+           <!-- HEATING -->
+            <div class="obox">
+              {% if c.w1_on > 0 %}
+                <div class="reportheader red">HEATING STATS</div>
+                <div class="reportrow">
+                  <span class="reportlabel">PERFORMANCE:</span>
+                  <span class="reportvalue">{{ c.perf_h|perf_pct }}%</span>
+                  <div class="reportchart">
+                    {{ c.perf_h|perf_chart:'reportred'|safe }}
+                  </div>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. 0.5&deg; CHANGE:</span>
+                  <span class="reportvalue">{{ c.perf_h|format_seconds }}</span>
+                </div>
+                {% if c.supply_h %}
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. SUPPLY TEMP:</span>
+                  <span class="reportvalue">{{ c.supply_h|floatformat:-1 }}&deg;</span>
+                </div>
+                {% endif %}
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. SETPOINT:</span>
+                  <span class="reportvalue">{{ c.h_sp|floatformat:-1 }}&deg;</span>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. STAGE 1 RUN TIME:</span>
+                  <span class="reportvalue">{{ c.w1_on|format_minutes }}</span>
+                </div>
+                {% if c.w2_on > 0 %}
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. STAGE 2 RUN TIME:</span>
+                  <span class="reportvalue">{{ c.w2_on|format_minutes }}</span>
+                </div>
+                {% endif %}
+              {% endif %}
+            </div>
+
+            <!-- COOLING -->
+            <div class="obox">
+              {% if c.y1_on > 0 %}
+                <div class="reportheader blue">COOLING STATS</div>
+
+                {% if c.g_on > 0 %}
+                  <div class="reportrow">
+                    <span class="reportlabel">PERFORMANCE:</span>
+                    <span class="reportvalue">{{ c.perf_c|perf_pct }}%</span>
+                    <div class="reportchart">
+                      {{ c.perf_c|perf_chart:'reportblue'|safe }}
+                    </div>
+                  </div>
+                  <div class="reportrow">
+                    <span class="reportlabel">AVG. 0.5&deg; CHANGE:</span>
+                    <span class="reportvalue">{{ c.perf_c|format_seconds }}</span>
+                  </div>
+                  {% if c.supply_c %}
+                  <div class="reportrow">
+                    <span class="reportlabel">AVG. SUPPLY TEMP:</span>
+                    <span class="reportvalue">{{ c.supply_c|floatformat:-1 }}&deg;</span>
+                  </div>
+                  {% endif %}
+                {% endif %}
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. SETPOINT:</span>
+                  <span class="reportvalue">{{ c.c_sp|floatformat:-1 }}&deg;</span>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. STAGE 1 RUN TIME:</span>
+                  <span class="reportvalue">{{ c.y1_on|format_minutes }}</span>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">TOTAL STAGE 1 RUN TIME:</span>
+                  <span class="reportvalue">{{ c.y1_total|format_minutes }}</span>
+                </div>
+                {% if c.y2_on > 0 %}
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. STAGE 2 RUN TIME:</span>
+                  <span class="reportvalue">{{ c.y2_on|format_minutes }}</span>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">TOTAL STAGE 2 RUN TIME:</span>
+                  <span class="reportvalue">{{ c.y2_total|format_minutes }}</span>
+                </div>
+                {% endif %}
+                {% if c.fc_on > 0 %}
+                <div class="reportrow">
+                  <span class="reportlabel">AVG. FREE COOLING RUN TIME:</span>
+                  <span class="reportvalue">{{ c.fc_on|format_minutes }}</span>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">TOTAL FREE COOLING RUN TIME:</span>
+                  <span class="reportvalue">{{ c.fc_total|format_minutes }}</span>
+                </div>
+                <div class="reportrow">
+                  <span class="reportlabel">TOTAL MIXED COOLING RUN TIME:</span>
+                  <span class="reportvalue">{{ c.mix_total|format_minutes }}</span>
+                </div>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+
+        {% endfor %}
+      {% endif %}
+
+
+      {% if lights %}
+        <div class="section">Lights</div>
+        {% for c in lights %}
+          <div class="reportbox">
+            <div class="reporticon light"></div>
+            <div class="leftbox">
+              <div class="reportheader left">{{ c.name|title }}</div>
+              <div class="reportrow left">
+                <span class="reportlabel">TOTAL ON TIME:</span>
+                <span class="reportvalue">{{ c.total|format_minutes }}</span>
+              </div>
+              <div class="reportrow left">
+                <span class="reportlabel">AVG. ON TIME:</span>
+                <span class="reportvalue">{{ c.on|format_minutes }}</span>
+              </div>
+              {% if c.avg %}
+              <div class="reportrow left">
+                <span class="reportlabel">AVG. OUTPUT LEVEL:</span>
+                <span class="reportvalue">{{ c.avg|floatformat:-2 }}%</span>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+
+      {% if alarms %}
+        <div class="section">Other Alarms</div>
+          <div class="reportbox">
+            <div class="alarmbox">
+              <div class="reportrow_noborder">
+                <span class="reportlabel">ALARMS:</span>
+              </div>
+              <div class="reportrow_noheight">
+                <table border="0" cellpadding="10px">
+                   {% for a in alarms %}
+                   <tr>
+                     <td class="reportvalue">{{a.ts}}</td>
+                     <td class="reportvalue"><b>{{a.code|format_alarm_code}}</b></td>
+                     <td class="reportvalue">{{a.source_name}}</td>
+                   </tr>
+                   {% endfor %}
+                </table>
+              </div>
+            </div>
+          </div>
+	</div>
+      {% endif %}
+
+
+      <!--
+      <div class="reportbox">
+        <div class="reporticon hvac"></div>
+        <div class="leftbox">
+          <div class="reportheader left">Dining Room</div>
+          <div class="reportrow left">
+            <span class="reportlabel">AVG. RUN TIME:</span>
+            <span class="reportvalue">7.2 hours</span>
+          </div>
+        </div>
+        <div class="obox">
+          <div class="reportheader red">HEATING</div>
+          <div class="reportrow">
+            <span class="reportlabel">PERFORMANCE:</span>
+            <span class="reportvalue">VERY LOW</span>
+            <div class="reportchart">
+              <span class="reportred">///</span><span class="reportgray">///////</span>
+            </div>
+          </div>
+          <div class="reportrow">
+            <span class="reportlabel">AVG. 0.5 DEG CHANGE:</span>
+            <span class="reportvalue">32 minutes</span>
+          </div>
+        </div>
+        <div class="obox">
+          <div class="reportheader blue">COOLING</div>
+        </div>
+      </div>
+      -->
+
+
+
+    </div>
+  </body>
+</html>

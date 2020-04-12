@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Start of uesgtest Zendesk Widget script -->
+<script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=f4a98b95-3e21-41dd-aa62-736b4ad41cfe"> </script>
+<!-- End of uesgtest Zendesk Widget script -->
+
+    <title>Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/stylesheet.css' %}" />
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" />
+    <meta http-equiv="refresh" content="30">
+  </head>
+  <body>
+    <div id="container">
+      {% include 'authnav.html' %}
+
+        <!-- <div class="authnav medsize"><span class="reg gray">Welcome {{ user.username }} |</span>
+          <span class="med">
+            <a href="/logout/">LOG OUT</a>
+          </span>
+        </div> -->
+
+
+      <div id="smalllogo"><a href="/"><img src="../static/images/ueslogo.jpg" border="0" style= "width:200px; height: 120px"/></a></div>
+
+      {% if client.logo %}
+      <div class="section gray bm20">ORGANIZATION</div>
+      <div style="overflow:hidden;">
+        <div style="float:left;margin-left:15px">
+          <img src="../static/{{ client.logo.url }}"/>
+        </div>
+      </div>
+      {% endif %}
+      <div class="section gray bm20">INSTALLATION LOCATIONS</div>
+      <div style="overflow:hidden;">
+        <div style="float:left;margin-left:15px;min-height:200px;">
+          {% for i in locs %}
+            <div style="position:relative;" class="med locationbar">
+              <div class="barleft">
+                <span style="float:left;">{{ i.name }}</span>
+                <span style="color:#c0c0c0;position:absolute;left:380px;">{{ i.client }}</span>
+              </div>
+              {% if i.has_unity %}
+              <a href="/client/?key={{ i.key }}&user={{ ruser }}" target="_blank"><div class="remotebutton"></div></a>
+              {% else %}
+              <div class="button_placeholder"></div>
+              {% endif %}
+              <a href="/report/?key={{ i.key }}"><div class="reportbutton"></div></a>
+              {% if is_admin %}
+              <a href="/internal_reports/?key={{ i.key }}"><div class="internalreportsbutton">?</div></a>
+              {% endif %}
+              {% if i.has_unity %}
+              <div class="online_indicator {% ifnotequal i.is_online 1 %}offline{% endifnotequal %}"></div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+
+        </div>
+      </div>
+      <div class="section gray bm20">SUPPORT CONTACT</div>
+      <div style="overflow:hidden;">
+        <div class="med medsize" style="float:left;margin-left:15px">
+          Tel: +1 (877) 486 4892 X3<br/>
+          <br/>
+          Email: <a style = "color:blue;text-decoration: underline;" href="mailto:customerservice@unityesg.com">customerservice@unityesg.com</a>
+        </div>
+      </div>
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=f4a98b95-3e21-41dd-aa62-736b4ad41cfe"> </script>
+
+  <title>{{ locname }}</title>
+  {% load static %}
+
+  <!-- <script type="text/javascript" src="{% static 'js/swfobject.js' %}"></script> -->
+  <script type="text/javascript" src="/static/js/swfobject.js"></script>
+
+  <script type="text/javascript">
+  var flashvars = {
+    {% if version >= 4 %}
+    secretKey:"{{secret_key}}",
+      {% if new_proxy %}
+      host:"proxy.unityesg.net",
+      {% else %}
+      host:"proxy.kiteandlightning.com",
+      {% endif %}
+
+    {% else %}
+    host:"go.kiteandlightning.com",
+    {% endif %}
+    key:"{{key}}"{% if user %},
+    user:"{{user}}"{% endif %}{% if force %},
+    force:true{% endif %}
+   };
+   // <object type="application/x-shockwave-flash" data="/static/swf/unity_client.{{version}}.swf?{{rnd}}">
+   // <param name='movie' value="/static/swf/unity_client.{{version}}.swf?{{rnd}}"/>
+   // <param name='bgcolor' value="#222222"/>
+   // <param name='FlashVars' value="{{flashvars}}}" />
+   // <param name='allowscriptaccess' value="sameDomain"/>
+   // </object>
+  swfobject.embedSWF('/static/swf/unity_client.{{version}}.swf?{{rnd}}', "flash", 1366, 768, "10.0.0", "{% static 'swf/expressInstall.swf' %}", flashvars, {}, {bgcolor:"#222222"});
+
+  </script>
+  <style type="text/css">
+  	#flash {margin:0px auto; width:100%; max-width:1366px; height:768px;}
+  	body {margin: 0; padding: 0; background-color: #222222; text-align:center;}
+  </style>
+</head>
+<body>
+  <div id="flash"><p>Flash is required to connect to remote units.<a href="http://www.macromedia.com/go/getflashplayer">Click here to install</a>.</p></div>
+</body>
+</html>
