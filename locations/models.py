@@ -38,7 +38,7 @@ class Order(models.Model):
       total = models.IntegerField(blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
 
 
-class Category(models.Model):
+class Aisle(models.Model):
       name = models.CharField(max_length=100)
 
 
@@ -48,6 +48,26 @@ class Category(models.Model):
         return self.name
 
 
+class Category(models.Model):
+      name = models.CharField(max_length=100)
+      aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, blank=True, null=True)
+
+
+      def __str__(self):
+        return self.name
+      def __unicode__(self):
+        return self.name
+
+class SubCategory(models.Model):
+      name = models.CharField(max_length=100)
+      category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
+
+
+      def __str__(self):
+        return self.name
+      def __unicode__(self):
+        return self.name
+
 class Product(models.Model):
       name = models.CharField(max_length=100)
       image = models.ImageField(upload_to="images/", null = True, blank = True)
@@ -55,7 +75,7 @@ class Product(models.Model):
       price_per_kg = models.IntegerField(blank=True, null=True)
       price_per_tied_bunch = models.IntegerField(blank=True, null=True)
       price_per_unit = models.IntegerField(blank=True, null=True)
-      categories = models.ManyToManyField(Category)
+      subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, blank=True, null=True)
 
       def __str__(self):
         return self.name

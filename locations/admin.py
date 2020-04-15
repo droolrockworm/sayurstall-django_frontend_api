@@ -24,6 +24,18 @@ class CategoryAdmin(admin.ModelAdmin):
 
 admin.site.register(Category, CategoryAdmin)
 
+class AisleAdmin(admin.ModelAdmin):
+    list_display = ['name']
+
+
+admin.site.register(Aisle, AisleAdmin)
+
+class SubCategoryAdmin(admin.ModelAdmin):
+    list_display = ['name']
+
+
+admin.site.register(SubCategory, SubCategoryAdmin)
+
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ['email']
 
