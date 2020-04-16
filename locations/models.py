@@ -5,7 +5,57 @@
 #   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
+from __future__ import unicode_literals
+
+
 from django.db import models
+
+
+
+import sys
+import json
+import math
+import logging
+import calendar
+from django.db import connection
+from django.core.mail import mail_admins, send_mail
+import datetime
+import traceback
+import bson
+import time
+
+import requests
+from .forms import EmailForm
+
+from django.core.mail import send_mail
+
+from django.utils import timezone
+
+
+import socket
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
+from django.conf import settings
+# from locations.models import Location, HistoricalKWInfo, Client, UserProfile, Dealer, Devices
+
+from locations.report_helpers import *
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from pymongo import MongoClient
+from bson import json_util
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render_to_response
+# from django.views.generic.simple import direct_to_template
+import django.contrib.auth.views as auth_views
+from django.contrib.auth import logout
+from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.template import RequestContext
+from django.conf import settings
+from random import random
+from django.views.generic import TemplateView
+from django.http import FileResponse
+from django.core import serializers
+
 
 MEASURE_CHOICES = [
     ('Tied Bunch','Tied Bunch'),
@@ -31,12 +81,19 @@ class Order(models.Model):
 
       additional = models.TextField(blank=True, null=True)
       estimated_total = models.IntegerField(blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
-      date_created = models.DateTimeField(null=True,blank=True)
+      created = models.DateTimeField(null=True,blank=True)
+      modified = models.DateTimeField(null=True,blank=True)
       customer = models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True)
       date_fulfilled = models.DateTimeField(null=True,blank=True)
       date_payed = models.DateTimeField(null=True,blank=True)
       total = models.IntegerField(blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
 
+      def save(self, *args, **kwargs):
+        ''' On save, update timestamps '''
+        if not self.id:
+            self.created = datetime.datetime.now(tz=timezone.utc)
+        self.modified = datetime.datetime.now(tz=timezone.utc)
+        return super(Order, self).save(*args, **kwargs)
 
 class Aisle(models.Model):
       name = models.CharField(max_length=100)
@@ -76,7 +133,17 @@ class Product(models.Model):
       price_per_tied_bunch = models.IntegerField(blank=True, null=True)
       price_per_unit = models.IntegerField(blank=True, null=True)
       subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, blank=True, null=True)
+      category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
+      aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, blank=True, null=True)
 
+      created = models.DateTimeField(null=True,blank=True)
+      modified = models.DateTimeField(null=True,blank=True)
+      def save(self, *args, **kwargs):
+        ''' On save, update timestamps '''
+        if not self.id:
+            self.created = datetime.datetime.now(tz=timezone.utc)
+        self.modified = datetime.datetime.now(tz=timezone.utc)
+        return super(Product, self).save(*args, **kwargs)
       def __str__(self):
         return self.name
       def __unicode__(self):

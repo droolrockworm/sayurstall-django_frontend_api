@@ -6,14 +6,33 @@ from django.contrib import admin
 # Register your models here.
 from locations.models import *
 
+from django import forms
+from django.contrib import admin
+
 class UsersAdmin(admin.ModelAdmin):
     list_display = ['name_title']
 
 
 admin.site.register(Users, UsersAdmin)
 
+class ProductAdminForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = "__all__" # for Django 1.8
+    def __init__(self, *args, **kwargs):
+        super(ProductAdminForm, self).__init__(*args, **kwargs)
+        # access object through self.instance...
+        ## this doesn't allow for responsive in the admin ui
+        self.fields['subcategory'].queryset = SubCategory.objects.filter(category=self.instance.category)
+        self.fields['category'].queryset = Category.objects.filter(aisle=self.instance.aisle)
+
+
+
+
 class ProductAdmin(admin.ModelAdmin):
+
     list_display = ['name']
+    # form = ProductAdminForm
 
 
 admin.site.register(Product, ProductAdmin)
