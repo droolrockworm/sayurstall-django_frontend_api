@@ -129,12 +129,15 @@ class Product(models.Model):
       name = models.CharField(max_length=100)
       image = models.ImageField(upload_to="images/", null = True, blank = True)
       description = models.CharField(max_length=100, blank=True, null=True)
+      aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, blank=True, null=True)
+      category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
+      subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, blank=True, null=True)
+
       price_per_kg = models.IntegerField(blank=True, null=True)
       price_per_tied_bunch = models.IntegerField(blank=True, null=True)
       price_per_unit = models.IntegerField(blank=True, null=True)
-      subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, blank=True, null=True)
-      category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
-      aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, blank=True, null=True)
+
+
 
       created = models.DateTimeField(null=True,blank=True)
       modified = models.DateTimeField(null=True,blank=True)

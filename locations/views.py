@@ -26,7 +26,7 @@ import socket
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.conf import settings
-from locations.models import Product
+from locations.models import Product,Aisle,Category,SubCategory
 # from locations.models import Location, HistoricalKWInfo, Client, UserProfile, Dealer, Devices
 
 from locations.report_helpers import *
@@ -68,14 +68,39 @@ def index(request):
 
 def get_products(request):
     try:
+        result = {'result': {'aisles':[],'products':[]}}
+
 
         products = Product.objects.all()
+        aisles = Aisle.objects.all()
+        categories = Category.objects.all()
+        subs = SubCategory.objects.all()
+
+        # clients = Client.objects.filter(dealer=profile.dealer)
+        #     return Location.objects.filter(client__in=clients)
+        for aisle in aisles:
+            a = {'name':aisle.name,'categories':[]}
+            categories = Category.objects.filter(aisle=aisle)
+            # print(categories)
+            for category in categories:
+                c = {'name':category.name,'subcategories':[]}
+                # print(c)
+
+                subcategories = SubCategory.objects.filter(category=category)
+                for sub in subcategories:
+
+                    c['subcategories'].append(sub.name)
+                a['categories'].append(c)
+            print(a)
+            result['result']['aisles'].append(a)
+
+
         post_list = serializers.serialize('json', products)
         # print(post_list)
         # names = [f.name for f in Product._meta.get_fields()]
 
 
-        toreturn = []
+        retproducts = []
         for prod in products:
             # for name in names:
             #     print(name)
@@ -84,23 +109,31 @@ def get_products(request):
             if prod.image:
 
                 myimg = '/static/' + str(prod.image).split('/')[1]
+            # print(prod.category)
             jsonprod = {
                'name' : prod.name,
                'price_per_kg': prod.price_per_kg,
                'image': myimg,
                'price_per_tied_bunch': prod.price_per_tied_bunch,
                'price_per_unit': prod.price_per_unit,
-               'categories': [x.name for x in prod.categories.all()]
-                # 'categories': prod.categories.all()
 
-               # 'price': prod.price,
-               # 'measurement': prod.measurement
+
 
 
             }
-            toreturn.append(jsonprod)
+            if prod.category:
+
+                jsonprod['category'] = prod.category.name
+            if prod.aisle:
+
+                jsonprod['aisle'] = prod.aisle.name
+            if prod.subcategory:
+
+                jsonprod['subcategory'] = prod.subcategory.name
+
+            retproducts.append(jsonprod)
+        result['result']['products'] = retproducts
         # print(toreturn)
-        result = {'result': toreturn}
         return JsonResponse(result)
     except:
          e = sys.exc_info()
