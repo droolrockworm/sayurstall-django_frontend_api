@@ -29,6 +29,7 @@ urlpatterns = [ url(r'^admin/', admin.site.urls),
 # urlpatterns = [
 #     url(r'^admin/', admin.site.urls),
 #
+    url(r'^tz_detect/', include('tz_detect.urls')),
     url(r'^ng_api/', include('locations.urls')),
 #
 #     # There maybe shouldn't be a login url

@@ -11,6 +11,7 @@ from __future__ import unicode_literals
 from django.db import models
 
 
+from django.utils.html import mark_safe
 
 import sys
 import json
@@ -64,17 +65,15 @@ MEASURE_CHOICES = [
 ]
 
 class Customer(models.Model):
-      first_name = models.CharField(max_length=100)
-      last_name = models.CharField(max_length=100)
+      name = models.CharField(max_length=100)
       email = models.CharField(max_length=100)
       phone = models.CharField(max_length=100)
       address = models.CharField(max_length=100)
       optional = models.CharField(max_length=100)
       province = models.CharField(max_length=100)
-      postal_code = models.CharField(max_length=100)
+      postal = models.CharField(max_length=100)
       city = models.CharField(max_length=100)
       country = models.CharField(max_length=100)
-      state = models.CharField(max_length=100, blank=True, null=True)
 
 
 class Order(models.Model):
@@ -87,7 +86,9 @@ class Order(models.Model):
       date_fulfilled = models.DateTimeField(null=True,blank=True)
       date_payed = models.DateTimeField(null=True,blank=True)
       total = models.IntegerField(blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
-
+      active = models.BooleanField(help_text="Is the order active?",
+                                 default=True)
+      delivery_slot = models.DateTimeField(null=True,blank=True)
       def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
         if not self.id:
@@ -128,6 +129,10 @@ class SubCategory(models.Model):
 class Product(models.Model):
       name = models.CharField(max_length=100)
       image = models.ImageField(upload_to="images/", null = True, blank = True)
+      def image_tag(self):
+            return mark_safe('<img src="/images/%s" width="150" height="150" />' % (self.image))
+
+      image_tag.short_description = 'Image'
       description = models.CharField(max_length=100, blank=True, null=True)
       aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, blank=True, null=True)
       category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)

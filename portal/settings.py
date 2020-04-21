@@ -63,9 +63,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'locations',
-    'test'
+    'test',
+    # 'tz_detect',
+    # 'easy_timezones',
 ]
-
+# GEOIP_DATABASE = '/data/portal/portal/GeoLite2-City_20200414/GeoLite2-City.mmdb'
+# GEOIP_DATABASE = '/data/portal/portal/GeoLite2-City_20200414/GeoLite2-City.mmdb'
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 
@@ -76,6 +79,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'tz_detect.middleware.TimezoneMiddleware',
+    # 'easy_timezones.middleware.EasyTimezoneMiddleware',
 ]
 
 ROOT_URLCONF = 'portal.urls'
@@ -163,7 +168,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Makassar'
 
 USE_I18N = True
 

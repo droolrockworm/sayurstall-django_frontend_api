@@ -13,6 +13,7 @@ import datetime
 import traceback
 import bson
 import time
+import pytz
 
 import requests
 from .forms import EmailForm
@@ -26,7 +27,7 @@ import socket
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.conf import settings
-from locations.models import Product,Aisle,Category,SubCategory
+from locations.models import Product,Aisle,Category,SubCategory,Order,ProductOrder,Customer
 # from locations.models import Location, HistoricalKWInfo, Client, UserProfile, Dealer, Devices
 
 from locations.report_helpers import *
@@ -68,12 +69,14 @@ def index(request):
 
 def get_products(request):
     try:
+
+        # from easy_timezones.signals import detected_timezone
+        # print(detected_timezone)
         result = {'result': {'aisles':[],'products':[]}}
 
 
         products = Product.objects.all()
         aisles = Aisle.objects.all()
-        categories = Category.objects.all()
         subs = SubCategory.objects.all()
 
         # clients = Client.objects.filter(dealer=profile.dealer)
@@ -91,7 +94,6 @@ def get_products(request):
 
                     c['subcategories'].append(sub.name)
                 a['categories'].append(c)
-            print(a)
             result['result']['aisles'].append(a)
 
 
@@ -134,6 +136,18 @@ def get_products(request):
             retproducts.append(jsonprod)
         result['result']['products'] = retproducts
         # print(toreturn)
+        #
+        # times = ['9:00,10:00,11:00','12:00','1:00','2:00','3:00','4:00','5:00']
+        #
+        # from datetime import date
+        # times = []
+        # i = 1
+        # while i < 4:
+        #
+        #     date = datetime.date.today() + datetime.timedelta(days=1)
+        #     print (date)
+        #     i = i + 1
+        # activeorders = Category.objects.filter(active=True)
         return JsonResponse(result)
     except:
          e = sys.exc_info()
@@ -148,6 +162,43 @@ def post_order(request):
     try:
         stuff = json.loads(request.body.decode('utf-8'))
         print(stuff)
+        cust = Customer.objects.filter(phone=stuff['custinfo']['phone']) | Customer.objects.filter(email=stuff['custinfo']['email'])
+        cust = cust[0]
+        if not cust:
+            cust = Customer(name=stuff['custinfo']['name'],
+                            email =stuff['custinfo']['email'],
+                            phone =stuff['custinfo']['phone'],
+                            address =stuff['custinfo']['address1'],
+                            optional =stuff['custinfo']['address2'],
+                            province =stuff['custinfo']['province'],
+                            postal =stuff['custinfo']['postal'],
+                            city =stuff['custinfo']['city'],
+                            country =stuff['custinfo']['country'])
+            cust.save()
+
+        print(datetime.datetime.utcfromtimestamp(stuff['ts']/1000).replace(tzinfo=pytz.utc))
+        order = Order(estimated_total=stuff['total'],
+                        additional=stuff['additional'],
+                        customer = cust,
+                        active = True,
+                        delivery_slot = datetime.datetime.utcfromtimestamp(stuff['ts']/1000).replace(tzinfo=pytz.utc))
+        order.save()
+
+        for i in stuff['cart']:
+            prod = Product.objects.get(name=i['name'])
+            prodord = ProductOrder(product=prod,
+                            measurement =i['measurement'],
+                            quantity =i['quantity'],
+                            order = order)
+            if prodord.measurement == 'Tied Bunch':
+                prodord.unit_price = prod.price_per_tied_bunch
+            if prodord.measurement == 'Kg':
+                prodord.unit_price = prod.price_per_kg
+            if prodord.measurement == 'Unit':
+                prodord.unit_price = prod.price_per_unit
+            prodord.save()
+
+
         jsonreturn = {"result": "success"}
 
 
