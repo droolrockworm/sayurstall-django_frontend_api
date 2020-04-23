@@ -14,6 +14,7 @@ import traceback
 import bson
 import time
 import pytz
+import calendar
 
 import requests
 from .forms import EmailForm
@@ -72,7 +73,7 @@ def get_products(request):
 
         # from easy_timezones.signals import detected_timezone
         # print(detected_timezone)
-        result = {'result': {'aisles':[],'products':[]}}
+        result = {'result': {'aisles':[],'products':[],'occupied':[]}}
 
 
         products = Product.objects.all()
@@ -135,19 +136,18 @@ def get_products(request):
 
             retproducts.append(jsonprod)
         result['result']['products'] = retproducts
-        # print(toreturn)
-        #
-        # times = ['9:00,10:00,11:00','12:00','1:00','2:00','3:00','4:00','5:00']
-        #
-        # from datetime import date
-        # times = []
-        # i = 1
-        # while i < 4:
-        #
-        #     date = datetime.date.today() + datetime.timedelta(days=1)
-        #     print (date)
-        #     i = i + 1
-        # activeorders = Category.objects.filter(active=True)
+
+        occupied = []
+        activeorders = Order.objects.filter(active=True)
+        for i in activeorders:
+            if i.delivery_slot:
+                occupied.append(i.delivery_slot.timestamp())
+        result['result']['occupied'] = occupied
+
+
+
+
+
         return JsonResponse(result)
     except:
          e = sys.exc_info()
@@ -161,11 +161,10 @@ def post_order(request):
 
     try:
         stuff = json.loads(request.body.decode('utf-8'))
-        print(stuff)
         cust = Customer.objects.filter(phone=stuff['custinfo']['phone']) | Customer.objects.filter(email=stuff['custinfo']['email'])
         cust = cust[0]
         if not cust:
-            cust = Customer(name=stuff['custinfo']['name'],
+            cust = Customer.objects.create(name=stuff['custinfo']['name'],
                             email =stuff['custinfo']['email'],
                             phone =stuff['custinfo']['phone'],
                             address =stuff['custinfo']['address1'],
@@ -174,19 +173,16 @@ def post_order(request):
                             postal =stuff['custinfo']['postal'],
                             city =stuff['custinfo']['city'],
                             country =stuff['custinfo']['country'])
-            cust.save()
 
-        print(datetime.datetime.utcfromtimestamp(stuff['ts']/1000).replace(tzinfo=pytz.utc))
-        order = Order(estimated_total=stuff['total'],
+        order = Order.objects.create(estimated_total=stuff['total'],
                         additional=stuff['additional'],
                         customer = cust,
                         active = True,
                         delivery_slot = datetime.datetime.utcfromtimestamp(stuff['ts']/1000).replace(tzinfo=pytz.utc))
-        order.save()
 
         for i in stuff['cart']:
             prod = Product.objects.get(name=i['name'])
-            prodord = ProductOrder(product=prod,
+            prodord = ProductOrder.objects.create(product=prod,
                             measurement =i['measurement'],
                             quantity =i['quantity'],
                             order = order)

@@ -62,7 +62,7 @@ class SubCategoryAdmin(admin.ModelAdmin):
 admin.site.register(SubCategory, SubCategoryAdmin)
 
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['email','phone']
+    list_display = ['email','phone','id']
 
 
 admin.site.register(Customer, CustomerAdmin)
@@ -117,7 +117,7 @@ class ProductOrderInline(admin.TabularInline):
           return mark_safe('<img src="/images/%s" width="150" height="150" />' % (obj.product.image))
 
     image_tag.short_description = 'Image'
-    
+
     # readonly_fields = ('product_name',)
 
     show_change_link = True
@@ -145,7 +145,12 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
 
+
+
+
 admin.site.register(Order, OrderAdmin)
+
+
 
 # class ScrapeStatusFilter(SimpleListFilter):
 #   title = 'Scrape status' # a label for our filter

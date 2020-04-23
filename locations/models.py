@@ -65,15 +65,15 @@ MEASURE_CHOICES = [
 ]
 
 class Customer(models.Model):
-      name = models.CharField(max_length=100)
-      email = models.CharField(max_length=100)
-      phone = models.CharField(max_length=100)
-      address = models.CharField(max_length=100)
-      optional = models.CharField(max_length=100)
-      province = models.CharField(max_length=100)
-      postal = models.CharField(max_length=100)
-      city = models.CharField(max_length=100)
-      country = models.CharField(max_length=100)
+      name = models.CharField(max_length=100, blank=True, null=True)
+      email = models.CharField(max_length=100, blank=True, null=True)
+      phone = models.CharField(max_length=100, blank=True, null=True)
+      address = models.CharField(max_length=100, blank=True, null=True)
+      optional = models.CharField(max_length=100, blank=True, null=True)
+      province = models.CharField(max_length=100, blank=True, null=True)
+      postal = models.CharField(max_length=100, blank=True, null=True)
+      city = models.CharField(max_length=100, blank=True, null=True)
+      country = models.CharField(max_length=100, blank=True, null=True)
 
 
 class Order(models.Model):
