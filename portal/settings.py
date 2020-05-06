@@ -32,7 +32,7 @@ with open('/data/secret_key.txt') as f:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '0.0.0.0', 'go.kiteandlightning.com', 'go.unityesg.net', 'go.unityesg.com', 'ec2-34-221-134-231.us-west-2.compute.amazonaws.com']
+ALLOWED_HOSTS = ['sayurstall.com','localhost', '0.0.0.0','18.136.95.78']
 
 ## For "Daily" database
 MONGO_URL='mongodb://root:beetroot@db.unityesg.net/daily'

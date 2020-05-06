@@ -78,36 +78,39 @@ def get_products(request):
 
         products = Product.objects.all()
         aisles = Aisle.objects.all()
-        subs = SubCategory.objects.all()
+        categories = Category.objects.all()
+        a = {'name':'All','categories':[]}
+        for category in categories:
+            c = {'name':category.name,'subcategories':[]}
+            # print(c)
 
-        # clients = Client.objects.filter(dealer=profile.dealer)
-        #     return Location.objects.filter(client__in=clients)
-        for aisle in aisles:
-            a = {'name':aisle.name,'categories':[]}
-            categories = Category.objects.filter(aisle=aisle)
-            # print(categories)
-            for category in categories:
-                c = {'name':category.name,'subcategories':[]}
-                # print(c)
+            subcategories = SubCategory.objects.filter(category=category)
+            for sub in subcategories:
 
-                subcategories = SubCategory.objects.filter(category=category)
-                for sub in subcategories:
+                c['subcategories'].append(sub.name)
+            a['categories'].append(c)
+        result['result']['aisles'].append(a)
 
-                    c['subcategories'].append(sub.name)
-                a['categories'].append(c)
-            result['result']['aisles'].append(a)
+        # for aisle in aisles:
+        #     a = {'name':aisle.name,'categories':[]}
+        #     categories = Category.objects.filter(aisle=aisle)
+        #     for category in categories:
+        #         c = {'name':category.name,'subcategories':[]}
+        #
+        #         subcategories = SubCategory.objects.filter(category=category)
+        #         for sub in subcategories:
+        #
+        #             c['subcategories'].append(sub.name)
+        #         a['categories'].append(c)
+        #     result['result']['aisles'].append(a)
 
 
         post_list = serializers.serialize('json', products)
-        # print(post_list)
-        # names = [f.name for f in Product._meta.get_fields()]
 
 
         retproducts = []
         for prod in products:
-            # for name in names:
-            #     print(name)
-                # print(getattr(prod, name))
+
             myimg = None
             if prod.image:
 
