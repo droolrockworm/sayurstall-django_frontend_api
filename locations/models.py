@@ -96,19 +96,19 @@ class Order(models.Model):
         self.modified = datetime.datetime.now(tz=timezone.utc)
         return super(Order, self).save(*args, **kwargs)
 
-class Aisle(models.Model):
-      name = models.CharField(max_length=100)
-
-
-      def __str__(self):
-        return self.name
-      def __unicode__(self):
-        return self.name
+# class Aisle(models.Model):
+#       name = models.CharField(max_length=100)
+#
+#
+#       def __str__(self):
+#         return self.name
+#       def __unicode__(self):
+#         return self.name
 
 
 class Category(models.Model):
       name = models.CharField(max_length=100)
-      aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, blank=True, null=True)
+      # aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, blank=True, null=True)
 
 
       def __str__(self):
@@ -134,13 +134,14 @@ class Product(models.Model):
 
       image_tag.short_description = 'Image'
       description = models.CharField(max_length=100, blank=True, null=True)
-      aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, blank=True, null=True)
+      # aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, blank=True, null=True)
       category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
       subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, blank=True, null=True)
+      price = models.IntegerField(blank=True, null=True)
 
-      price_per_kg = models.IntegerField(blank=True, null=True)
-      price_per_tied_bunch = models.IntegerField(blank=True, null=True)
-      price_per_unit = models.IntegerField(blank=True, null=True)
+      # price_per_kg = models.IntegerField(blank=True, null=True)
+      # price_per_tied_bunch = models.IntegerField(blank=True, null=True)
+      # price_per_unit = models.IntegerField(blank=True, null=True)
 
 
 
@@ -161,8 +162,8 @@ class Product(models.Model):
 
 class ProductOrder(models.Model):
       product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True)
-      unit_price = models.IntegerField(blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
-      measurement = models.CharField(max_length=100, choices=MEASURE_CHOICES, default='kg')
+      # unit_price = models.IntegerField(blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
+      # measurement = models.CharField(max_length=100, choices=MEASURE_CHOICES, default='kg')
       quantity = models.IntegerField(blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
       order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
       # def get_choices(self, obj):

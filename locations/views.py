@@ -28,7 +28,7 @@ import socket
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.conf import settings
-from locations.models import Product,Aisle,Category,SubCategory,Order,ProductOrder,Customer
+from locations.models import Product,Category,SubCategory,Order,ProductOrder,Customer
 # from locations.models import Location, HistoricalKWInfo, Client, UserProfile, Dealer, Devices
 
 from locations.report_helpers import *
