@@ -73,13 +73,11 @@ def get_products(request):
 
         # from easy_timezones.signals import detected_timezone
         # print(detected_timezone)
-        result = {'result': {'aisles':[],'products':[],'occupied':[]}}
+        result = {'result': {'categories':[],'products':[],'occupied':[]}}
 
 
         products = Product.objects.all()
-        aisles = Aisle.objects.all()
         categories = Category.objects.all()
-        a = {'name':'All','categories':[]}
         for category in categories:
             c = {'name':category.name,'subcategories':[]}
             # print(c)
@@ -88,24 +86,7 @@ def get_products(request):
             for sub in subcategories:
 
                 c['subcategories'].append(sub.name)
-            a['categories'].append(c)
-        result['result']['aisles'].append(a)
-
-        # for aisle in aisles:
-        #     a = {'name':aisle.name,'categories':[]}
-        #     categories = Category.objects.filter(aisle=aisle)
-        #     for category in categories:
-        #         c = {'name':category.name,'subcategories':[]}
-        #
-        #         subcategories = SubCategory.objects.filter(category=category)
-        #         for sub in subcategories:
-        #
-        #             c['subcategories'].append(sub.name)
-        #         a['categories'].append(c)
-        #     result['result']['aisles'].append(a)
-
-
-        post_list = serializers.serialize('json', products)
+            result['result']['categories'].append(c)
 
 
         retproducts = []
@@ -115,14 +96,12 @@ def get_products(request):
             if prod.image:
 
                 myimg = '/static/' + str(prod.image).split('/')[1]
-            # print(prod.category)
             jsonprod = {
                'name' : prod.name,
-               'price_per_kg': prod.price_per_kg,
+               'description' : prod.description,
+               'price': prod.price,
                'image': myimg,
-               'price_per_tied_bunch': prod.price_per_tied_bunch,
-               'price_per_unit': prod.price_per_unit,
-
+               
 
 
 
@@ -130,9 +109,7 @@ def get_products(request):
             if prod.category:
 
                 jsonprod['category'] = prod.category.name
-            if prod.aisle:
 
-                jsonprod['aisle'] = prod.aisle.name
             if prod.subcategory:
 
                 jsonprod['subcategory'] = prod.subcategory.name
