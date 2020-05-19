@@ -86,6 +86,11 @@ def get_products(request):
             for sub in subcategories:
 
                 c['subcategories'].append(sub.name)
+            catimg = None
+            if category.image:
+
+                catimg = '/static/' + str(category.image).split('/')[1]
+            c['image'] = catimg
             result['result']['categories'].append(c)
 
 
@@ -101,7 +106,7 @@ def get_products(request):
                'description' : prod.description,
                'price': prod.price,
                'image': myimg,
-               
+
 
 
 
@@ -163,15 +168,16 @@ def post_order(request):
         for i in stuff['cart']:
             prod = Product.objects.get(name=i['name'])
             prodord = ProductOrder.objects.create(product=prod,
-                            measurement =i['measurement'],
+                            # measurement =i['measurement'],
                             quantity =i['quantity'],
-                            order = order)
-            if prodord.measurement == 'Tied Bunch':
-                prodord.unit_price = prod.price_per_tied_bunch
-            if prodord.measurement == 'Kg':
-                prodord.unit_price = prod.price_per_kg
-            if prodord.measurement == 'Unit':
-                prodord.unit_price = prod.price_per_unit
+                            order = order,
+                            price = prod.price)
+            # if prodord.measurement == 'Tied Bunch':
+            #     prodord.unit_price = prod.price_per_tied_bunch
+            # if prodord.measurement == 'Kg':
+            #     prodord.unit_price = prod.price_per_kg
+            # if prodord.measurement == 'Unit':
+            #     prodord.unit_price = prod.price_per_unit
             prodord.save()
 
 

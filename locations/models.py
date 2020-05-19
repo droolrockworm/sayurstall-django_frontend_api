@@ -109,7 +109,11 @@ class Order(models.Model):
 class Category(models.Model):
       name = models.CharField(max_length=100)
       # aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, blank=True, null=True)
+      image = models.ImageField(upload_to="images/", null = True, blank = True)
+      def image_tag(self):
+            return mark_safe('<img src="/images/%s" width="150" height="150" />' % (self.image))
 
+      image_tag.short_description = 'Image'
 
       def __str__(self):
         return self.name
@@ -162,7 +166,7 @@ class Product(models.Model):
 
 class ProductOrder(models.Model):
       product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True)
-      # unit_price = models.IntegerField(blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
+      price = models.IntegerField(blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
       # measurement = models.CharField(max_length=100, choices=MEASURE_CHOICES, default='kg')
       quantity = models.IntegerField(blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
       order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
